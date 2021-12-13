@@ -20,8 +20,7 @@ entity vga_regulator is
             vertical_sync_pulse   : out STD_LOGIC; 
             horizontal_out        : out INTEGER;
             vertical_out          : out INTEGER;
-            display_enable        : out STD_LOGIC;
-            printed_frame         : out STD_LOGIC);
+            display_enable        : out STD_LOGIC);
 end vga_regulator;
 
 architecture Behavioral of vga_regulator is
@@ -33,10 +32,6 @@ architecture Behavioral of vga_regulator is
                                             + VERTICAL_FRONTPORCH + VERTICAL_BACKPORCH;
     -- signals --
     signal vertical_count_enable : STD_LOGIC := '0';
-    
-    --private:
-    signal signaled:boolean:=False;
-    signal change:boolean:=False;
 begin
 
     process( clock , clear )
@@ -51,10 +46,6 @@ begin
             vertical_sync_pulse   <= not VERTICAL_POLARITY;
             
         elsif rising_edge( clock ) then
-            if (change) then
-                printed_frame<='0';
-                change<=False;
-            end if;
             -- horizontal pixel count
             if (horizontal_count = (HORIZONTAL_PERIOD - 1)) then
                 horizontal_count := 0;
@@ -92,15 +83,7 @@ begin
             -- enable display 
             if (horizontal_count < HORIZONTAL_PIXELS AND vertical_count < VERTICAL_PIXELS ) then
                 display_enable <= '1';
-                if (not signaled) then
-                    signaled<=True;
-                end if;
             else
-                if (signaled) then
-                    printed_frame <= '1';
-                    signaled<=False;
-                    change<=True;
-                end if;
                 display_enable <= '0';
             end if;
             

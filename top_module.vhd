@@ -5,14 +5,13 @@ use WORK.ENVIRONMENT_PACKAGE.ALL;
 
 entity top_module is
     Port (  clk100mhz           : in STD_LOGIC;
-            --initial_condition   : in STD_LOGIC_VECTOR(2 downto 0);
+            initial_condition   : in STD_LOGIC_VECTOR(2 downto 0);
             enable              : in STD_LOGIC;
             time_selection      : in STD_LOGIC_VECTOR(1 downto 0);
             size_selection      : in STD_LOGIC_VECTOR(1 downto 0);
             button              : in STD_LOGIC_VECTOR(4 downto 0);
             
-            leds1               : out STD_LOGIC_VECTOR(3 downto 0);
-            leds2               : out STD_LOGIC;
+            leds                : out STD_LOGIC_VECTOR(7 downto 0);
             horizontal_sync     : out STD_LOGIC;
             vertical_sync       : out STD_LOGIC;
             vgaRed              : out STD_LOGIC_VECTOR(3 downto 0);
@@ -23,20 +22,21 @@ end top_module;
 architecture Behavioral of top_module is
     -- components
     component environment is
-        Generic (FIELD_SIZE : INTEGER := 32);
-    Port    (clock_controlled  : in STD_LOGIC;
-             button_clock      : in STD_LOGIC;
-             clock_enable      : in STD_LOGIC;
-             button            : in STD_LOGIC_VECTOR(4 downto 0);
-             printed           : inout STD_LOGIC;
-             
-             cursor_x          : out INTEGER;
-             cursor_y          : out INTEGER;
-             field_out         : out FIELD(0 to (FIELD_SIZE - 1), 0 to (FIELD_SIZE - 1)));
+        Generic (FIELD_SIZE : INTEGER := 4);
+        Port    (clock             : in STD_LOGIC;
+                 button_clock      : in STD_LOGIC;
+                 clock_enable      : in STD_LOGIC;
+                 button            : in STD_LOGIC_VECTOR(4 downto 0);
+                 initial_condition : in STD_LOGIC_VECTOR(2 downto 0);
+                 
+                 cursor_x          : out INTEGER;
+                 cursor_y          : out INTEGER;
+                 
+                 field_out         : out FIELD(0 to (FIELD_SIZE - 1), 0 to (FIELD_SIZE - 1)));
     end component;
     
     component vga_controller is
-        Generic (FIELD_SIZE : INTEGER := 32);
+        Generic (FIELD_SIZE : INTEGER := 4);
         Port (  clock100mhz     : in STD_LOGIC;
                 clock_enable    : in STD_LOGIC;
                 cursor_x        : in INTEGER;
@@ -48,8 +48,7 @@ architecture Behavioral of top_module is
                 vertical_sync   : out STD_LOGIC;
                 red             : out STD_LOGIC_VECTOR(3 downto 0);
                 green           : out STD_LOGIC_VECTOR(3 downto 0);
-                blue            : out STD_LOGIC_VECTOR(3 downto 0);
-                frame_printed   : out STD_LOGIC);
+                blue            : out STD_LOGIC_VECTOR(3 downto 0));
     end component;
     
     component clock_div is
@@ -84,13 +83,13 @@ architecture Behavioral of top_module is
     signal cursor_control : STD_LOGIC_VECTOR(4 downto 0);
     signal cursor_x       :INTEGER;
     signal cursor_y       :INTEGER;
-    signal donePrinting   : STD_LOGIC;
 
 begin  
     -- identify which switches are on-------------
-    leds2 <= enable;
-    leds1(1 downto 0) <= size_selection;
-    leds1(3 downto 2) <= time_selection;
+    leds(0) <= enable;
+    leds(3 downto 1) <= initial_condition;
+    leds(5 downto 4) <= size_selection;
+    leds(7 downto 6) <= time_selection;
     ----------------------------------------------
     
     -- extra aid for managing modular design
@@ -113,11 +112,11 @@ begin
                     
     P2 : environment 
     Generic Map (FIELD_SIZE => SIZE)
-Port Map    (clock_controlled      => clock_out,
+    Port Map    (clock             => clock_out,
                  button_clock      => button_clock,
                  clock_enable      => enable,
-                 printed           => donePrinting,
                  button            => cursor_control,
+                 initial_condition => initial_condition,
                  cursor_x          => cursor_x,
                  cursor_y          => cursor_y,
                  field_out         => myField);     
@@ -134,6 +133,5 @@ Port Map    (clock_controlled      => clock_out,
                     vertical_sync   => vertical_sync,
                     red             => vgaRed,
                     green           => vgaGreen,
-                    blue            => vgaBlue,
-                    frame_printed   => donePrinting);
+                    blue            => vgaBlue);
 end Behavioral;

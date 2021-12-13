@@ -5,7 +5,7 @@ use WORK.ENVIRONMENT_PACKAGE.ALL;
 --use UNISIM.VComponents.all;
 
 entity vga_display is
-    Generic (FIELD_SIZE : INTEGER := 32);
+    Generic (FIELD_SIZE : INTEGER := 4);
     Port (  display_enable      : in STD_LOGIC;
             clock_enable        : in STD_LOGIC;
             
@@ -56,7 +56,7 @@ begin
                 green <= "1000";
                 blue  <= "1000"; 
             elsif ((indexX < myField'length) AND (indexY < myField'length) 
-                    AND myField(indexX, indexY)='1') then
+                    AND isAlive(myField, indexX, indexY)) then
                 -- white
                 red   <= (others => '1');
                 green <= (others => '1');

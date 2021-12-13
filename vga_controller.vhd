@@ -3,7 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use WORK.ENVIRONMENT_PACKAGE.ALL;
 
 entity vga_controller is
-    Generic (FIELD_SIZE : INTEGER := 32);
+    Generic (FIELD_SIZE : INTEGER := 4);
     Port (  clock100mhz     : in STD_LOGIC;
             clock_enable    : in STD_LOGIC;
             cursor_x        : in INTEGER;
@@ -15,8 +15,7 @@ entity vga_controller is
             vertical_sync   : out STD_LOGIC;
             red             : out STD_LOGIC_VECTOR(3 downto 0);
             green           : out STD_LOGIC_VECTOR(3 downto 0);
-            blue            : out STD_LOGIC_VECTOR(3 downto 0);
-            frame_printed   : out STD_LOGIC);
+            blue            : out STD_LOGIC_VECTOR(3 downto 0));
 end vga_controller;
 
 architecture Behavioral of vga_controller is
@@ -48,12 +47,11 @@ component vga_regulator
             vertical_sync_pulse   : out STD_LOGIC;
             horizontal_out        : out INTEGER;
             vertical_out          : out INTEGER;
-            display_enable        : out STD_LOGIC;
-            printed_frame         : out STD_LOGIC);
+            display_enable        : out STD_LOGIC);
 end component;
 
 component vga_display
-    Generic (FIELD_SIZE : INTEGER := 32);
+    Generic (FIELD_SIZE : INTEGER := 4);
     Port (  display_enable      : in STD_LOGIC;
             clock_enable        : in STD_LOGIC;
             
@@ -96,8 +94,7 @@ begin
                 vertical_sync_pulse   => vertical_sync,
                 horizontal_out        => h_outS,
                 vertical_out          => v_outS,
-                display_enable        => dis_en,
-                printed_frame         => frame_printed);    
+                display_enable        => dis_en);    
                 
     P3: vga_display
     Generic Map (FIELD_SIZE => FIELD_SIZE)
